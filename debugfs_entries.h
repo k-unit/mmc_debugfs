@@ -12,6 +12,8 @@
 #endif
 
 /* add debugfs entries here */
+DEBUGFS_HOST(mmc_jira_template_debugfs_host)
+DEBUGFS_CARD(mmc_jira_template_debugfs_card)
 
 #undef DEBUGFS_DECLARATIONS
 #undef DEBUGFS_HOST_ENTRIES
