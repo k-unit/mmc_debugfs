@@ -1,0 +1,92 @@
+From 75212d100ffec70b946e5c439c4949231a7dafbd Mon Sep 17 00:00:00 2001
+From: Ilan Smith <ilan.smith@sandisk.com>
+Date: Sun, 9 Aug 2015 22:39:15 +0300
+Subject: [PATCH] Added mobilehost debugfs entries.
+
+With time, different buggy scenarios are encountered for the
+debugging of which debugfs entries are added.
+The mh_debugfs repository holds the implementation of these
+entries and enables easy porting to the different oem kernels.
+---
+ drivers/Makefile               |  2 ++
+ drivers/mmc/core/debugfs.c     |  8 ++++++++
+ include/linux/mmc/mh_debugfs.h | 24 ++++++++++++++++++++++++
+ 3 files changed, 34 insertions(+)
+ create mode 100644 include/linux/mmc/mh_debugfs.h
+
+diff --git a/drivers/Makefile b/drivers/Makefile
+index f54e902..f4156aa 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -174,3 +174,5 @@ obj-$(CONFIG_LGE_BROADCAST_TDMB) += broadcast/
+ 
+ # LGE_BROADCAST_ISDBT_JAPAN
+ obj-$(CONFIG_LGE_BROADCAST_ISDBT_JAPAN) += broadcast/
++
++obj-$(CONFIG_DEBUG_FS)		+= $(MH_DEBUG_FS_PATH)
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 3bb54e2..4b1b484 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -19,6 +19,7 @@
+ 
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/mh_debugfs.h>
+ 
+ #include "core.h"
+ #include "mmc_ops.h"
+@@ -290,6 +291,10 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+ 					     &host->fail_mmc_request)))
+ 		goto err_node;
+ #endif
++
++	if (!mmc_mh_debugfs_host(host, root))
++		goto err_node;
++
+ 	return;
+ 
+ err_node:
+@@ -984,6 +989,9 @@ void mmc_add_card_debugfs(struct mmc_card *card)
+ 					 &mmc_dbg_bkops_stats_fops))
+ 			goto err;
+ 
++	if (!mmc_mh_debugfs_card(card, root))
++		goto err;
++
+ 	return;
+ 
+ err:
+diff --git a/include/linux/mmc/mh_debugfs.h b/include/linux/mmc/mh_debugfs.h
+new file mode 100644
+index 0000000..f2c3f38
+--- /dev/null
++++ b/include/linux/mmc/mh_debugfs.h
+@@ -0,0 +1,24 @@
++#ifndef _MH_DEBUGFS_
++#define _MH_DEBUGFS_
++
++#include <linux/fs.h>
++#include <linux/mmc/card.h>
++#include <linux/mmc/host.h>
++
++#ifdef CONFIG_DEBUG_FS
++bool mmc_mh_debugfs_host(struct mmc_host *host, struct dentry *root);
++bool mmc_mh_debugfs_card(struct mmc_card *card, struct dentry *root);
++#else
++static inline bool mmc_mh_debugfs_host(struct mmc_host *host,
++	struct dentry *root)
++{
++	return true;
++}
++static inline bool mmc_mh_debugfs_card(struct mmc_card *card,
++	struct dentry *root);
++{
++	return true;
++}
++#endif
++#endif
++
+-- 
+1.9.1
+
