@@ -97,6 +97,40 @@ static int mmc_debugfs_template_card(void)
 	return 0;
 }
 
+static int mmc_debugfs_dev_tree(void)
+{
+	return mmc_debugfs_read_test(false, "dev_tree",
+		".\n" \
+		"|\n" \
+		"+-- platform\n" \
+		"    |\n" \
+		"    +-- kunit-hc.0\n" \
+		"    |   |\n" \
+		"    |   +-- mmc0 [host]\n" \
+		"    |       |\n" \
+		"    |       +-- mmc0:0001 [card]\n" \
+		"    |           |\n" \
+		"    |           +-- mmcblk0\n" \
+		"    |               |\n" \
+		"    |               +-- mmcblk0p1\n" \
+		"    |               |\n" \
+		"    |               +-- mmcblk0p2\n" \
+		"    |               |\n" \
+		"    |               +-- mmcblk0p3\n" \
+		"    |               |\n" \
+		"    |               +-- mmcblk0p4\n" \
+		"    |               |\n" \
+		"    |               +-- mmcblk0p5\n" \
+		"    |               |\n" \
+		"    |               +-- mmcblk0p6\n" \
+		"    |               |\n" \
+		"    |               +-- mmcblk0p7\n" \
+		"    |               |\n" \
+		"    |               +-- mmcblk0p8\n" \
+		"    |\n" \
+		"    +-- ram_console\n");
+}
+ 
 static struct single_test mmc_debugfs_tests[] = {
 	{
 		description: "tempate host: verify host debugfs file " \
@@ -107,6 +141,10 @@ static struct single_test mmc_debugfs_tests[] = {
 		description: "tempate card: verify card debugfs file " \
 			"operations",
 		func: mmc_debugfs_template_card,
+	},
+	{
+		description: "dev_tree: verify correct device tree hierarchy",
+		func: mmc_debugfs_dev_tree,
 	},
 };
 
@@ -138,7 +176,7 @@ static int mmc_debugfs_init(void)
 	 */
 
 	if (!kut_dev_init(&platform, NULL, "platform"))
-		return -1;
+		goto error;
 
 	/* allocate host controller, host, card and 8 partitions */
 	if (kut_mmc_init(&platform, &hc, &host, &card, 8))
