@@ -13,6 +13,8 @@
 
 /* add debugfs entries here */
 DEBUGFS_HOST(mmc_jira_template_debugfs_host)
+DEBUGFS_HOST(mmc_nr_free_buffer_pages_debugfs)
+
 DEBUGFS_CARD(mmc_jira_template_debugfs_card)
 DEBUGFS_CARD(mmc_dev_tree_debugfs)
 
